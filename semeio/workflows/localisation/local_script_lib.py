@@ -134,7 +134,7 @@ class Decay:
 class GaussianDecay(Decay):
     cutoff: bool
 
-    def __call__(self, data_index):
+    def __call__(self, data_index) -> float:
         d2 = super().norm_dist_square(data_index)
         if self.cutoff and d2 > 1.0:
             return 0.0
@@ -365,7 +365,7 @@ def build_decay_object(
     grid: object,
     use_cutoff: bool,
     tapering_range: float = 1.5,
-) -> Any:
+) -> Decay:
     # pylint: disable=too-many-arguments
     decay_obj = None
     if method == "gaussian_decay":
@@ -419,7 +419,7 @@ def build_decay_object(
     return decay_obj
 
 
-def calculate_scaling_vector_fields(grid: object, decay_obj: object):
+def calculate_scaling_vector_fields(grid: object, decay_obj: object) -> ma.MaskedArray:
     assert isinstance(grid, Grid)
     nx = grid.getNX()
     ny = grid.getNY()
@@ -693,12 +693,12 @@ def smooth_parameter(
 def apply_segment(
     row_scaling,
     grid,
-    region_param_dict,
-    active_segment_list,
-    scaling_factor_list,
-    smooth_range_list,
-    corr_name,
-    log_level=LogLevel.OFF,
+    region_param_dict: Dict[str, Any],
+    active_segment_list: List[int],
+    scaling_factor_list: List[float],
+    smooth_range_list: List[int],
+    corr_name: str,
+    log_level: LogLevel = LogLevel.OFF,
     calculate_qc_parameter: bool = False,
 ):
     # pylint: disable=too-many-arguments,too-many-locals
@@ -748,10 +748,6 @@ def apply_segment(
 
     # Assign values to row_scaling object
     row_scaling.assign_vector(scaling_values)
-
-    #    for index in range(data_size):
-    #        global_index = grid.global_index(active_index=index)
-    #        row_scaling[index] = scaling_values[global_index]
 
     not_defined_in_region_param = []
     for n in active_segment_list:
