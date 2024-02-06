@@ -380,10 +380,8 @@ def make_obs_groups(key_map):
     return combinations
 
 
-def count_active_observations(df_update_log):
-    """To get the active observation info."""
-    df_active = df_update_log[(df_update_log["status"] == "Active")]
-    return len(df_active)
+def count_active_observations(df_update_log: pd.DataFrame):
+    return (df_update_log["status"] == "Active").sum()
 
 
 def calc_observationsgroup_misfit(obs_keys, df_update_log, misfit_df):
