@@ -384,23 +384,29 @@ def count_active_observations(df_update_log: pd.DataFrame):
     return (df_update_log["status"] == "Active").sum()
 
 
-def calc_observationsgroup_misfit(obs_keys, df_update_log, misfit_df):
+def calc_observationsgroup_misfit(
+    obs_keys: str, df_update_log: pd.DataFrame, misfit_df: pd.DataFrame
+):
     """To get the misfit for total observations (active/inactive)."""
 
-    total_obs_nr = len(df_update_log[df_update_log.status.isin(["Active", "Inactive"])])
+    total_obs_nr = (
+        df_update_log["status"].isin(["Active", "Inactive"]).sum()
+    )  # TODO: Which other statuses can df_update_log.status have?
+
     if total_obs_nr == 0:
-        mean = pd.DataFrame({0: [-999]}).loc[0]
-        warnings.warn("WARNING: no MISFIT value for observation " + obs_keys)
-    else:
-        df_misfit_calc = pd.DataFrame()
-        df_misfit_calc["Misfit_key"] = "MISFIT:" + df_update_log[
-            df_update_log.status.isin(["Active", "Inactive"])
-        ]["obs_key"].astype(str)
-        df_misfit_calc = pd.DataFrame.drop_duplicates(df_misfit_calc)
-        mean = (
-            misfit_df[df_misfit_calc.loc[:, "Misfit_key"].to_list()].sum(axis=1)
-            / total_obs_nr
-        )
+        warnings.warn(f"WARNING: no MISFIT value for observation {obs_keys}")
+        # TODO: Why -999.0?
+        return -999.0
+
+    df_misfit_calc = pd.DataFrame()
+    df_misfit_calc["Misfit_key"] = "MISFIT:" + df_update_log[
+        df_update_log.status.isin(["Active", "Inactive"])
+    ]["obs_key"].astype(str)
+    df_misfit_calc = pd.DataFrame.drop_duplicates(df_misfit_calc)
+    mean = (
+        misfit_df[df_misfit_calc.loc[:, "Misfit_key"].to_list()].sum(axis=1)
+        / total_obs_nr
+    )
     return mean.mean()
 
 
