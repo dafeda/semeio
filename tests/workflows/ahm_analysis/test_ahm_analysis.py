@@ -8,7 +8,6 @@ import pytest
 from ert.storage import open_storage
 from scipy import stats
 
-from semeio._exceptions.exceptions import ValidationError
 from semeio.workflows.ahm_analysis import ahmanalysis
 from semeio.workflows.ahm_analysis.ahmanalysis import _run_ministep
 
@@ -214,37 +213,6 @@ def test_check_names():
     p_name, tname = ahmanalysis.check_names(ert_currentname, prior_name, target_name)
     assert p_name == ert_currentname
     assert tname != "<ANALYSIS_CASE_NAME>"
-
-
-@pytest.mark.parametrize(
-    "misfit_data, prior_data, expected_msg",
-    [
-        (
-            pd.DataFrame(),
-            pd.DataFrame({"KEY:OP1": [0, 1, 2]}),
-            "Empty prior ensemble",
-        ),
-        (
-            pd.DataFrame(
-                {
-                    "MISFIT:KEY": [6],
-                }
-            ),
-            pd.DataFrame(),
-            "Empty parameters set for History Matching",
-        ),
-    ],
-)
-def test_raise_if_empty(misfit_data, prior_data, expected_msg):
-    """test function check that run fails if empty misfit or prior data"""
-    with pytest.raises(ValidationError, match=expected_msg):
-        ahmanalysis.raise_if_empty(
-            dataframes=[prior_data, misfit_data],
-            messages=[
-                "Empty prior ensemble",
-                "Empty parameters set for History Matching",
-            ],
-        )
 
 
 @pytest.mark.parametrize(

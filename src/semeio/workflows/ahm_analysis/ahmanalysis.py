@@ -136,21 +136,12 @@ class AhmAnalysisJob(SemeioScript):
         # Get the prior scalar parameter distributions
         ensemble = self.storage.get_ensemble_by_name(prior_name)
         prior_data = ensemble.load_all_gen_kw_data()
-        try:
-            raise_if_empty(
-                dataframes=[
-                    prior_data,
-                    self.facade.load_all_misfit_data(
-                        self.storage.get_ensemble_by_name(prior_name)
-                    ),
-                ],
-                messages=[
-                    "Empty prior ensemble",
-                    "Empty parameters set for History Matching",
-                ],
-            )
-        except KeyError as err:
-            raise ValidationError(f"Empty prior ensemble: {err}") from err
+
+        if prior_data.empty:
+            raise ValidationError("Empty prior ensemble")
+
+        if self.facade.load_all_misfit_data(ensemble).empty:
+            raise ValidationError("Empty parameter set for History Matching")
 
         # create dataframe with observations vectors (1 by 1 obs and also all_obs)
         combinations = make_obs_groups(key_map)
@@ -488,14 +479,6 @@ def check_names(ert_currentname, prior_name, target_name):
     if target_name == "<ANALYSIS_CASE_NAME>":
         target_name = "analysis_case"
     return prior_name, target_name
-
-
-def raise_if_empty(dataframes, messages):
-    """Check input ensemble prior is not empty
-    and if ensemble contains parameters for hm"""
-    for dframe in dataframes:
-        if dframe.empty:
-            raise ValidationError(f"{messages}")
 
 
 def _group_observations(facade: LibresFacade, obs_keys: List[str], group_by: str):
