@@ -1,8 +1,10 @@
+from __future__ import annotations
 import collections
 import itertools
 import tempfile
 import warnings
 from pathlib import Path
+from typing import List, Optional, Dict, TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -15,6 +17,10 @@ from sklearn.preprocessing import StandardScaler
 
 from semeio._exceptions.exceptions import ValidationError
 from semeio.communication import SemeioScript
+
+if TYPE_CHECKING:
+    from ert import LibresFacade
+    import numpy.typing as npt
 
 DESCRIPTION = """
 AHM_ANALYSIS will calculate the degree of update (using Kolmogorov Smirnov test)
@@ -98,15 +104,15 @@ execution through Run Workflow button on ERT GUI
 
 
 class AhmAnalysisJob(SemeioScript):
-    """Define ERT workflow to evaluate change of parameters for eac
+    """Define ERT workflow to evaluate change of parameters for each
     observation during history matching
     """
 
     def run(
         self,
-        target_name="analysis_case",
-        prior_name=None,
-        group_by="data_key",
+        target_name: str = "analysis_case",
+        prior_name: Optional[str] = None,
+        group_by: str = "data_key",
         output_dir=None,
     ):
         # pylint: disable=method-hidden, too-many-statements, arguments-differ
@@ -301,14 +307,13 @@ def _run_ministep(facade, prior_storage, target_storage, obs_group, data_paramet
     return facade.smoother_update(prior_storage, target_storage, target_storage.name)
 
 
-def _get_field_params(facade, field_parameters, target_ensemble):
-    """
-    Because the FIELD parameters are not exposed in the Python API we have to
-    export them to file and read them back again. When they are exposed in the API
-    this function should be updated.
-    """
+def _get_field_params(
+    facade: LibresFacade, field_parameters: List[str], target_ensemble
+) -> Dict[str, npt.NDArray[np.float32]]:
+    # TODO: target_ensemble seems to be LocalEnsembleAccessor. Should it be reader?
     field_data = {}
     for field_param in field_parameters:
+        # TODO: How does this handle failing realizations?
         dataset = target_ensemble.load_parameters(
             field_param, list(range(facade.get_ensemble_size()))
         )
@@ -420,7 +425,12 @@ def load_grid_to_dataframe(grid_path):
         raise OSError("A grid with .EGRID format is expected.") from err
 
 
-def calc_mean_delta_grid(all_input_post, all_input_prior, grid):
+def calc_mean_delta_grid(
+    all_input_post: List[List[np.float32]],
+    all_input_prior: List[List[np.float32]],
+    grid: pd.DataFrame,
+):
+    # TODO: Should all_input_post and all_input_prior be np.arrays?
     """calculate mean delta of field grid data"""
     delta_post_prior = np.subtract(all_input_prior, all_input_post)
     delta_post_prior = np.absolute(delta_post_prior)
@@ -488,7 +498,7 @@ def raise_if_empty(dataframes, messages):
             raise ValidationError(f"{messages}")
 
 
-def _group_observations(facade, obs_keys, group_by):
+def _group_observations(facade: LibresFacade, obs_keys: List[str], group_by: str):
     key_map = collections.defaultdict(list)
     for obs_key in obs_keys:
         if group_by == "data_key":
