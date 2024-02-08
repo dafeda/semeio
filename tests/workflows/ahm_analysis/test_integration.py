@@ -48,8 +48,7 @@ def test_ahmanalysis_run(snake_oil_facade):
     ]
     assert (output_dir / "ks.csv").is_file()
     ks_df = pd.read_csv(output_dir / "ks.csv")
-    for keys in ks_df["Parameters"].tolist():
-        assert keys in parameters
+    assert sorted(parameters) == sorted(ks_df["Parameters"].tolist())
     assert ks_df.columns[1:].tolist() == group_obs
     assert ks_df["WOPR_OP1"].max() <= 1
     assert ks_df["WOPR_OP1"].min() >= 0

@@ -60,7 +60,8 @@ def test_count_active_observations():
     [
         (
             "RWI_3_OBS",
-            (2.0 + 10.0 / 3.0) / 2.0,  # TODO: What are these calculations?
+            (2.0 + 10.0 / 3.0)
+            / 2.0,  # TODO: What are these calculations? It's the misfit, but where do the numbers come from?
             {
                 "obs_key": {0: "RWI_3_OBS", 1: "RWI_3_OBS", 2: "RWI_3_OBS"},
                 "status": {0: "Active", 1: "Inactive", 2: "Active"},

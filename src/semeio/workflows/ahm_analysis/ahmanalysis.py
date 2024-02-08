@@ -385,13 +385,12 @@ def calc_observationsgroup_misfit(
 ):
     """To get the misfit for total observations (active/inactive)."""
 
-    total_obs_nr = (
-        df_update_log["status"].isin(["Active", "Inactive"]).sum()
-    )  # TODO: Which other statuses can df_update_log.status have?
+    # Assuming "status" is either "Active" or "Inactive"
+    total_obs_nr = df_update_log["status"].size
 
     if total_obs_nr == 0:
         warnings.warn(f"WARNING: no MISFIT value for observation {obs_keys}")
-        # TODO: Why -999.0?
+        # TODO: Why -999.0 and not, say, NaN?
         return -999.0
 
     df_misfit_calc = pd.DataFrame()
