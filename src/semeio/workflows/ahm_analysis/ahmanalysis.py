@@ -125,6 +125,13 @@ class AhmAnalysisJob(SemeioScript):
         if output_dir is not None:
             self._reports_dir = output_dir
 
+        # TODO: Difference between 'observation keys' and 'observation groups'?
+        #       I guess an 'observation group' consists of one or more 'observation keys'.
+        # SUMMARY_OBSERVATION have a key and an id. One key can contain multiple ids.
+        # For example: key=WOPR:OP1 can have ids: WOPR_OP1_9, WOPR_OP1_36 etc.
+        # GENERAL_OBSERVATION is different from SUMMARY_OBSERVATION in that it does not have a key and id.
+        # Rather, it just has a key defined as GENERAL_OBSERVATION <key>.
+        # Same with HISTORY_OBSERVATION
         obs_keys = list(self.facade.get_observations().obs_vectors.keys())
         key_map = _group_observations(self.facade, obs_keys, group_by)
 
