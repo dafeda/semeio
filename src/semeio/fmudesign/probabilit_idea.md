@@ -3,18 +3,21 @@
 **Probabilit** is a Python library for Monte Carlo analysis that provides an open-source alternative to commercial Excel add-ins like @Risk, ModelRisk, and Crystal Ball.
 Why not instead use existing libraries like `PyMC` or `SALib`? While both are excellent tools, they serve different purposes:
 
-- **PyMC** focuses on Bayesian inference and Markov Chain Monte Carlo (MCMC) methods. It doesn't provide native support for Latin Hypercube Sampling or straightforward specification of correlation between variables.
+- **PyMC** focuses on Bayesian inference and Markov Chain Monte Carlo (MCMC) methods.
+It doesn't provide native support for Latin Hypercube Sampling or straightforward specification of correlation between variables.
 
 - **SALib** is designed primarily for sensitivity analysis and its sampling methods assume independent parameters (see [SALib issue #193](https://github.com/SALib/SALib/issues/193)).
 
 **Probabilit** aims to fill this gap by providing:
 - Efficient Latin Hypercube Sampling and random sampling
-- Intuitive correlation specification (via the Iman-Conover method)
+- Inducing correlations that preserve marginal distributions via the Iman-Conover method (used by @Risk).
 - Recursive parameter definitions, i.e., the mean of a distribution can itself be a distribution.
 - A user-friendly API suitable for both interactive notebooks and production code
+- Support for yaml as both input and output.
 - See `Core Features` section for more details.
 
 Some of the hard math was already solved in the last version of fmudesign (https://github.com/equinor/semeio/blob/main/CHANGELOG.md#1180).
+We have extended Iman-Conover: https://github.com/equinor/semeio/commit/49df56c95db13ba24cdb73799b99ab4e24896b7e
 
 The library can also be used as the back-end for applications such as this: https://www.probabilit.com/
 
@@ -182,7 +185,7 @@ def test_comprehensive_project_analysis():
 
     market_scenario = exp.Trigen(
         pessimistic=0.85,
-        most_likely=1.0, 
+        most_likely=1.0,
         optimistic=1.15,
         prob_pessimistic=0.10,
         prob_optimistic=0.90,
